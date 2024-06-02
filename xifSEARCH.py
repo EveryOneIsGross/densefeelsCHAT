@@ -6,12 +6,16 @@ from gensim.models import Word2Vec
 import logging
 import pickle
 import os
-import sys
 from textblob import TextBlob
 from sklearn.neighbors import KernelDensity
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class Config:
+    def __init__(self, topk_results=16, max_tokens=128):
+        self.TOPK_RESULTS = topk_results
+        self.MAXTOKENS = max_tokens
 
 def preprocess_and_chunk(file_path, chunk_size=64, overlap=0.5, fallback_chunk_size=64):
     # Read a text file and preprocess it into fixed-size chunks with overlap.
@@ -146,15 +150,15 @@ def load_or_process_data(file_path):
         logging.info(f"Data processed and cached: {cache_path}")
         return data
 
-def main(file_path, query):
+def main(file_path, query, config):
     data = load_or_process_data(file_path)
     model = data['model']
     adaptive_chunks = data['adaptive_chunks']
-    search_results = search_results_with_sentiment(model, adaptive_chunks, query)
+    search_results = search_results_with_sentiment(model, adaptive_chunks, query, config)
     return search_results
 
-def search_results_with_sentiment(model, adaptive_chunks, query, max_tokens=512):
-    results = semantic_search(model, query, adaptive_chunks, top_k=5)
+def search_results_with_sentiment(model, adaptive_chunks, query, config):
+    results = semantic_search(model, query, adaptive_chunks, config.TOPK_RESULTS)
     unique_results = []
     seen_chunks = set()
 
@@ -162,11 +166,11 @@ def search_results_with_sentiment(model, adaptive_chunks, query, max_tokens=512)
         if chunk not in seen_chunks:
             sentiment = TextBlob(chunk).sentiment.polarity
             tokens = chunk.split()
-            if len(tokens) <= max_tokens:
+            if len(tokens) <= config.MAXTOKENS:
                 unique_results.append((chunk, score, sentiment))
                 seen_chunks.add(chunk)
             else:
-                shortened_chunk = ' '.join(tokens[:max_tokens])
+                shortened_chunk = ' '.join(tokens[:config.MAXTOKENS])
                 if shortened_chunk not in seen_chunks:
                     sentiment = TextBlob(shortened_chunk).sentiment.polarity
                     unique_results.append((shortened_chunk, score, sentiment))
