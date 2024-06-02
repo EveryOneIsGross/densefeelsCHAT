@@ -3,7 +3,7 @@ import num2words
 
 punctuation = r'\s,.?!/\)\]\[\<>\(\):;"'
 alphabet_map = {
-    "A": " aee ",
+    "A": " ah ",
     "B": " bee. ",
     "C": " see. ",
     "D": " dee. ",
@@ -29,7 +29,7 @@ alphabet_map = {
     "X": " ex. ",
     "Y": " why? ",
     "Z": " zed. ",
-    "a": " aee ",
+    "a": " a ",
     "b": " bee. ",
     "c": " see. ",
     "d": " dee. ",
@@ -85,32 +85,32 @@ known_abbreviations_map = {
 def preprocess(string):
     print("Original:", string)  # Debugging
     string = re.sub(r'\n', ' .  .  .  ', string)  # Replace newline characters with multiple pause tokens
-    print("After replacing newlines:", string)  # Debugging
+    #print("After replacing newlines:", string)  # Debugging
     string = remove_surrounded_chars(string)
-    print("After removing surrounded chars:", string)  # Debugging
+    #print("After removing surrounded chars:", string)  # Debugging
     string = string.replace('"', '')
     string = string.replace('\u201D', '').replace('\u201C', '')  # right and left quote
     string = string.replace('\u201F', '')  # italic looking quote
-    print("After replacing quotes:", string)  # Debugging
+    #print("After replacing quotes:", string)  # Debugging
     string = convert_num_locale(string)
-    print("After converting number locale:", string)  # Debugging
+    #print("After converting number locale:", string)  # Debugging
     string = replace_negative(string)
-    print("After replacing negatives:", string)  # Debugging
+    #print("After replacing negatives:", string)  # Debugging
     string = replace_roman(string)
-    print("After replacing roman numerals:", string)  # Debugging
+    #print("After replacing roman numerals:", string)  # Debugging
     string = hyphen_range_to(string)
-    print("After replacing hyphen ranges:", string)  # Debugging
+    #print("After replacing hyphen ranges:", string)  # Debugging
     string = convert_years_to_words(string)  # Convert years to their spoken equivalents
-    print("After converting years to words:", string)  # Debugging
+    #print("After converting years to words:", string)  # Debugging
     string = num_to_words(string)
-    print("After converting numbers to words:", string)  # Debugging
+    #print("After converting numbers to words:", string)  # Debugging
     string = replace_abbreviations(string)
-    print("After replacing abbreviations:", string)  # Debugging
+    #print("After replacing abbreviations:", string)  # Debugging
     string = replace_single_letters(string)
-    print("After replacing single letters:", string)  # Debugging
+    #print("After replacing single letters:", string)  # Debugging
     #string = re.sub(rf'\s*([{re.escape(punctuation)}])\s*', r' \1 ', string)
-    print("After adding space around punctuation:", string)  # Debugging
-    string = string.strip()
+    #print("After adding space around punctuation:", string)  # Debugging
+    string = string.strip() # Remove leading and trailing whitespace
     string = ' '.join(string.split())  # Ensure single spaces between words
     print("Final preprocessed string:", string)  # Debugging
     return string
@@ -180,12 +180,12 @@ def replace_single_letters(string):
     # Match single letters that are truly isolated by spaces or punctuation, excluding those preceded by an apostrophe
     pattern = re.compile(rf'(?<![a-zA-Z\'])\b([A-Za-z])\b(?![a-zA-Z])')
     result = pattern.sub(lambda x: match_mapping(x.group(1)), string)
-    print("After replacing isolated single letters:", result)  # Debugging
+    #print("After replacing isolated single letters:", result)  # Debugging
     # Match single letters followed by numbers and insert a space between them,
     # except when enclosed in quotation marks or part of a variable assignment or expression
     pattern_letter_number = re.compile(r'(?<!["\'])(?<![=(])([A-Za-z])(\d+)(?!["\'])(?![)])')
     result = pattern_letter_number.sub(lambda x: ' '.join(list(x.group(1) + x.group(2))), result)
-    print("After replacing letters followed by numbers:", result)  # Debugging
+    #print("After replacing letters followed by numbers:", result)  # Debugging
     return result
 
 def convert_years_to_words(text):
